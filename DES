@@ -1,0 +1,22 @@
+def simple_des_encrypt(text, key):
+    encrypted = ""
+    for char in text:
+        c = chr(ord(char) ^ key)
+        bits = f"{ord(c):08b}"[::-1]
+        new_c = chr(int(bits, 2))
+        encrypted += new_c
+    return encrypted
+def simple_des_decrypt(text, key):
+    decrypted = ""
+    for char in text:
+        bits = f"{ord(char):08b}"[::-1]
+        c = chr(int(bits, 2))
+        orig = chr(ord(c) ^ key)
+        decrypted += orig
+    return decrypted
+key = 42
+message = "Hello Chester Ira!"
+encrypted = simple_des_encrypt(message, key)
+print("Encrypted:", encrypted)
+decrypted = simple_des_decrypt(encrypted, key)
+print("Decrypted:", decrypted)
