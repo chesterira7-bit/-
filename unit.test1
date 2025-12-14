@@ -1,0 +1,54 @@
+import unittest
+import string
+import secrets
+
+def generate_password(length):
+    """Генерує випадковий пароль заданої довжини."""
+    all_chars = string.ascii_letters + string.digits + "!@#$%^&*()-_=+[]{};:,.<>?/"
+
+    upper = secrets.choice(string.ascii_uppercase)
+    lower = secrets.choice(string.ascii_lowercase)
+    digit = secrets.choice(string.digits)
+    special = secrets.choice("!@#$%^&*()-_=+[]{};:,.<>?/")
+    
+    remaining = ''.join(secrets.choice(all_chars) for _ in range(length - 4))
+    
+    password = list(upper + lower + digit + special + remaining)
+    secrets.SystemRandom().shuffle(password)
+    return ''.join(password)
+
+
+class TestPasswordGenerator(unittest.TestCase):
+    """Клас для тестування функції generate_password."""
+    def test_password_length(self):
+        """Перевіряє, чи має пароль правильну довжину."""
+        lengths = [4, 10, 25, 50]
+        for length in lengths:
+            password = generate_password(length)
+            
+            self.assertEqual(len(password), length, 
+                             f"Пароль довжиною {length} має неправильну довжину.")
+    def test_contains_required_chars(self):
+        """Перевіряє, чи містить пароль принаймні один символ кожного типу."""
+        password = generate_password(16)
+    
+        self.assertTrue(any(c in string.ascii_uppercase for c in password), 
+                        "Пароль не містить великої літери.")
+        
+        self.assertTrue(any(c in string.ascii_lowercase for c in password), 
+                        "Пароль не містить малої літери.")
+        
+        self.assertTrue(any(c in string.digits for c in password), 
+                        "Пароль не містить цифри.")
+        special_chars = "!@#$%^&*()-_=+[]{};:,.<>?/"
+        self.assertTrue(any(c in special_chars for c in password), 
+                        "Пароль не містить спеціального символу.")
+
+    def test_passwords_are_random(self):
+        """Перевіряє, чи генеруються різні паролі при послідовних викликах."""
+        length = 12
+        passwords = [generate_password(length) for _ in range(20)]
+        self.assertGreater(len(set(passwords)), 15, 
+                           "Більшість згенерованих паролів ідентичні, що вказує на проблему з випадковістю.")
+if __name__ == '__main__':
+    unittest.main()
