@@ -1,0 +1,40 @@
+import unittest
+from pyDes import des, ECB
+
+class TestDESEncryption(unittest.TestCase):
+
+    def setUp(self):
+        self.key = b"12345678"
+        self.data_string = "Ostapuk.Iryna"
+        self.data_bytes = self.data_string.encode('utf-8') 
+        self.cipher = des(self.key, ECB)
+        self.padmode = 2
+
+    def test_encryption_and_decryption_are_reversible(self):
+        encrypted_data = self.cipher.encrypt(self.data_bytes, padmode=self.padmode)
+        decrypted_data_bytes = self.cipher.decrypt(encrypted_data, padmode=self.padmode)
+        decrypted_data_string = decrypted_data_bytes.decode('utf-8')
+        self.assertEqual(decrypted_data_string, self.data_string)
+
+    def test_encrypted_data_is_different_from_original(self):
+        encrypted_data = self.cipher.encrypt(self.data_bytes, padmode=self.padmode)
+        self.assertNotEqual(encrypted_data, self.data_bytes)
+
+    def test_data_types(self):
+        encrypted_data = self.cipher.encrypt(self.data_bytes, padmode=self.padmode)
+        decrypted_data = self.cipher.decrypt(encrypted_data, padmode=self.padmode)
+        self.assertIsInstance(self.data_bytes, bytes)
+        self.assertIsInstance(encrypted_data, bytes)
+        self.assertIsInstance(decrypted_data, bytes)
+
+    def test_padding_is_applied(self):
+        encrypted_data = self.cipher.encrypt(self.data_bytes, padmode=self.padmode)
+        self.assertEqual(len(encrypted_data) % 8, 0)
+        
+    def test_key_length_validation(self):
+        invalid_key_short = b"short" 
+        with self.assertRaises(ValueError):
+            des(invalid_key_short, ECB)
+
+if __name__ == '__main__':
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
