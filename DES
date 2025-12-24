@@ -1,0 +1,8 @@
+from pyDes import des, ECB
+import pyDes
+data = "Ostapuk.Iryna"
+cipher = des(b"12345678", ECB)
+enc = cipher.encrypt(data, padmode=2)
+dec = cipher.decrypt(enc, padmode=2)
+print(enc)
+print(dec)

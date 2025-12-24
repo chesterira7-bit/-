@@ -1,0 +1,87 @@
+import unittest
+from unittest.mock import patch
+def scan_passwords(user_passwords, word_list):
+    weak_passwords_set = set(word_list)
+    weak_users = []
+    
+    print("Сканування слабких паролів...\n")
+    
+    for username, password in user_passwords.items(): 
+        
+        if password in weak_passwords_set:
+            print(f"Слабкий пароль | Користувач: {username}, Пароль: {password}")
+            weak_users.append(username)
+        
+        else:
+            print(f"Складний пароль | Користувач: {username}, Пароль: {password}")
+
+    return weak_users
+
+WEAK_PASSWORDS = [
+    "123456",
+    "пароль",
+    "qwerty",
+    "дракон",
+    "адміністратор",
+    "софія123",
+    "ira123",
+    "кіб1борг",
+    "діма12345678"
+]
+
+
+class TestPasswordScanner(unittest.TestCase):
+    
+    def setUp(self):
+        self.word_list = WEAK_PASSWORDS
+        
+        self.test_users_base = {
+            "user_weak_1": "123456",
+            "user_strong_1": "StrongP@ss2025",
+            "user_weak_2": "ira123",
+            "user_strong_2": "Qwerty123456!"
+        }
+
+    def test_returns_correct_weak_users(self):
+        expected_weak_users = ["user_weak_1", "user_weak_2"]
+        vulnerable_users = scan_passwords(self.test_users_base, self.word_list)
+        self.assertCountEqual(vulnerable_users, expected_weak_users)
+
+    def test_no_weak_passwords_found(self):
+        strong_users = {
+            "alice": "Alice123#",
+            "bob": "B0b!@#$"
+        }
+        vulnerable_users = scan_passwords(strong_users, self.word_list)
+        self.assertEqual(vulnerable_users, [])
+
+    def test_all_passwords_are_weak(self):
+        all_weak_users = {
+            "a_weak": "123456",
+            "b_weak": "дракон"
+        }
+        expected_weak_users = ["a_weak", "b_weak"]
+        vulnerable_users = scan_passwords(all_weak_users, self.word_list)
+        self.assertCountEqual(vulnerable_users, expected_weak_users)
+    
+    @patch('builtins.print')
+    def test_output_messages(self, mock_print):
+        users_to_test = {
+            "weak_user": "ira123",
+            "strong_user": "SecurePas$$"
+        }
+        scan_passwords(users_to_test, self.word_list)
+        
+        expected_output_fragments = [
+            "Сканування слабких паролів...\n",
+            "Слабкий пароль | Користувач: weak_user, Пароль: ira123",
+            "Складний пароль | Користувач: strong_user, Пароль: SecurePas$$"
+        ]
+        
+        actual_output = [call[0][0] for call in mock_print.call_args_list]
+        
+        for fragment in expected_output_fragments:
+            self.assertTrue(any(fragment in line for line in actual_output))
+
+if __name__ == '__main__':
+    unittest.main(argv=['first-arg-is-ignored'], exit=False)
